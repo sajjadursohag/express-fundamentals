@@ -13,9 +13,31 @@ app.use(express.urlencoded({ extended: true }));
 
 const pool = new Pool({
   connectionString:
-    "postgresql://neondb_owner:npg_Qc1LGahOFy3d@ep-raspy-breeze-ao25t6of.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+    "postgresql://neondb_owner:npg_Qc1LGahOFy3d@ep-raspy-breeze-ao25t6of.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=false&channel_binding=require",
 });
-console.log(pool);
+// console.log(pool);
+
+const initDB = async () => {
+  try {
+    await pool.query(`CREATE TABLE users(
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255), 
+      email VARCHAR(255) NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      age INT,
+      is_Active BOOLEAN DEFAULT true,
+
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+      )
+      `);
+    console.log("Database Connected Successfully");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+initDB();
 
 app.get("/", (req: Request, res: Response) => {
   console.log(req);
