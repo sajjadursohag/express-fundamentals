@@ -19,7 +19,7 @@ const pool = new Pool({
 
 const initDB = async () => {
   try {
-    await pool.query(`CREATE TABLE users(
+    await pool.query(`CREATE TABLE IF NOT EXISTS users(
       id SERIAL PRIMARY KEY,
       name VARCHAR(255), 
       email VARCHAR(255) NOT NULL,
@@ -49,15 +49,34 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-app.post("/", async (req: Request, res: Response) => {
-  // console.log(req.body);
-  const { name, age, password } = req.body;
-  console.log(password);
-  res.status(200).json({
-    success: true,
-    message: "This is a taste API!",
-    data: { name, age },
-  });
+app.post("/api/v1/users", async (req: Request, res: Response) => {
+  try {
+    // console.log(req.body);
+    const { name, email, age, password } = req.body;
+    // console.log(password);
+
+    const result = await pool.query(
+      `
+      INSERT INTO users (name, email, password, age) VALUES ($1, $2, $3, $4) RETURNING *
+    `,
+      [name, email, password, age],
+    );
+
+    // console.log(result);
+
+    res.status(200).json({
+      success: true,
+      message: "User created!",
+      data: result.rows[0],
+      // data: { name, age },
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error?.message,
+      error: error,
+    });
+  }
 });
 
 app.listen(port, () => {
