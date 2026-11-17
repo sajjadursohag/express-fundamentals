@@ -5,6 +5,7 @@ import express, {
 } from "express";
 import { Pool } from "pg";
 import { pool } from "./db";
+import { userRoute } from "./modules/users/user.route";
 const app: Application = express();
 
 app.use(express.json());
@@ -23,35 +24,9 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-app.post("/api/v1/users", async (req: Request, res: Response) => {
-  try {
-    // console.log(req.body);
-    const { name, email, age, password } = req.body;
-    // console.log(password);
+app.use("/api/v1/users", userRoute)
 
-    const result = await pool.query(
-      `
-        INSERT INTO users (name, email, password, age) VALUES ($1, $2, $3, $4) RETURNING *
-      `,
-      [name, email, password, age],
-    );
 
-    // console.log(result);
-
-    res.status(201).json({
-      success: true,
-      message: "User created!",
-      data: result.rows[0],
-      // data: { name, age },
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error?.message,
-      error: error,
-    });
-  }
-});
 
 app.get("/api/v1/users", async (req: Request, res: Response) => {
   try {
